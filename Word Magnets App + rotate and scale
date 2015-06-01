@@ -1,0 +1,429 @@
+//
+//  ViewController.swift
+//  Word Magnets
+//
+//  Created by Nas@Mac on 25/5/58.
+//  Copyright (c) พ.ศ. 2558 Nas-Mac. All rights reserved.
+//
+
+import UIKit
+import AVFoundation
+
+class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizerDelegate  {
+    
+    @IBOutlet weak var addWordTextField: UITextField!
+    @IBOutlet weak var editWordButton: UIButton!
+    @IBOutlet weak var bgColorButton: UIButton!
+    
+    var wordArray: [String]!
+    var imgArray: [String]!
+    
+    var x: CGFloat!
+    var y: CGFloat!
+    
+    var idx: Int8!
+    
+    var newText: String!
+    var newLabel: UILabel!
+    var myLabel: UILabel!
+    
+    var editLastWord: Bool!
+    var editTextField: UITextField!
+    
+    var newColor: UIColor!
+    
+    var randomRed: CGFloat!
+    var randomGreen: CGFloat!
+    var randomBlue:CGFloat!
+    
+    var soundPlayer: AVAudioPlayer? = nil
+    
+    func loadSound(filename: String) -> AVAudioPlayer {
+        let url = NSBundle.mainBundle().URLForResource(filename, withExtension: "caf")
+        var error: NSError? = nil
+        let player = AVAudioPlayer(contentsOfURL: url, error: &error)
+        if error != nil {
+            println("Error loading \(url): \(error?.localizedDescription)")
+        } else {
+            player.prepareToPlay()
+        }
+        return player
+    }
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        
+        // view device screen size
+        println("\(view.bounds.size)")
+        
+        // add data to word array
+        wordArray = ["play", "ping-pong", "with", "Michael", "while", "enjoy", "dancing", "with", "Taylor Swift's", "songs"]
+        imgArray = ["friend1.png", "friend2.png"]
+
+        editLastWord = false
+        
+        bgColorButton.backgroundColor = UIColor.blackColor()
+        newColor = UIColor.blackColor()
+        view.backgroundColor = UIColor.lightGrayColor()
+        
+        addWordTextField.delegate = self
+        addWordTextField.tag = 0
+
+//        // Set AV Player
+//        let filteredSubviews = self.view.subviews.filter(
+//            {$0.isKindOfClass(UIImageView)})
+//        for obj in filteredSubviews {
+//      <#Selector#>      let recognizer = UITapGestureRecognizer(target: self, action: ("handleTap:"))
+//            recognizer.delegate = self
+//            obj.addGestureRecognizer(recognizer)
+//            
+//        }
+//        self.soundPlayer = self.loadSound("chomp")
+        
+        refreshAllData()
+        
+    }
+    
+//    func tapImgToPlaySound() {
+//
+//        // Set AV Player
+//        let filteredSubviews = self.view.subviews.filter(
+//            {$0.isKindOfClass(UIImageView)})
+//        for obj in filteredSubviews {
+//            let recognizer = UITapGestureRecognizer(target: self, action: ("handleTap:"))
+//            recognizer.delegate = self
+//            obj.addGestureRecognizer(recognizer)
+//            
+//        }
+//        self.soundPlayer = self.loadSound("chomp")
+//        
+//    }
+    
+    func refreshAllData() {
+        
+        for view in self.view.subviews {
+            
+            if  view.isKindOfClass(UILabel) {
+                view.removeFromSuperview()
+            }
+            if (view.tag == 1) {
+                view.removeFromSuperview()
+            }
+            if (view.tag == 2) {
+                view.removeFromSuperview()
+            }
+        }
+        
+        refreshImage()
+        refreshWordLabel()
+    }
+    
+    func refreshWordLabel() {
+        
+        // loop for random value x, y
+        for word in wordArray {
+            
+            myLabel = UILabel()
+            myLabel.text = word
+            myLabel.font = UIFont.systemFontOfSize(20)
+            myLabel.textColor = UIColor.whiteColor()
+            myLabel.sizeToFit()
+            myLabel.backgroundColor = newColor
+            
+            // Define value of x and y for label not appear over screen.
+            x = CGFloat(arc4random_uniform(300))
+            y = CGFloat(arc4random_uniform(600))
+            
+            myLabel.center = CGPoint(x: x, y: y)
+            
+            view.addSubview(myLabel)
+            
+            // Pan Gesture
+            var panGesture = UIPanGestureRecognizer(target: self, action: Selector("handlePanGesture:"))
+            myLabel.addGestureRecognizer(panGesture)
+            
+            myLabel.userInteractionEnabled = true
+            
+        }
+    }
+    
+    func refreshImage() {
+        
+        var imgView = UIImageView()
+        //imgArray = ["friend1.png", "friend2.png"]
+        
+        for img in imgArray {
+            
+            imgView = UIImageView()
+            imgView.image = UIImage(named: img)
+            imgView.sizeToFit()
+            imgView.tag = 2
+            
+            x = CGFloat(arc4random_uniform(360))
+            y = CGFloat(arc4random_uniform(600))
+            
+            imgView.center = CGPoint(x: x, y: y)
+            imgView.userInteractionEnabled = true
+
+            view.addSubview(imgView)
+            
+            // Pan Gesture
+            var panGesture = UIPanGestureRecognizer(target: self, action: Selector("handlePicPanGesture:"))
+            imgView.addGestureRecognizer(panGesture)
+            // Pinch Gesture
+            var pinchGesture = UIPinchGestureRecognizer(target: self, action: Selector("handlePinch:"))
+            imgView.addGestureRecognizer(pinchGesture)
+            // Rotation Gesture
+            var rotateGesture = UIRotationGestureRecognizer(target: self, action: Selector("handleRotation:"))
+            imgView.addGestureRecognizer(rotateGesture)
+            // Tap Gesture
+
+        }
+    }
+    
+    func handleTap(tapGesture: UITapGestureRecognizer) {
+        
+        
+    }
+    
+    func handlePanGesture(panGesture: UIPanGestureRecognizer) {
+        
+        println("pan")
+        
+        // get new translation value (the distance that finger have moved)
+        var translation = panGesture.translationInView(view)
+        panGesture.setTranslation(CGPointZero, inView: view)
+        println(translation)
+        
+        // add dx, dy to current label center position
+        var label = panGesture.view as! UILabel
+        label.center = CGPoint(x: label.center.x + translation.x,
+            y: label.center.y + translation.y)
+        
+        // detect the touch velocity
+        if panGesture.state == UIGestureRecognizerState.Ended {
+            
+            // 1. figure out the length of the velocity vector (i.e. the magnitude)
+            let velocity = panGesture.velocityInView(view)
+            let magnitude = sqrt((velocity.x * velocity.x) + (velocity.y * velocity.y))
+            let slideMultiplier = magnitude / 200
+            println("magnitude: \(magnitude), slideMultiplier: \(slideMultiplier)")
+            
+            // 2. if the length is < 200, then decrease the base speed, otherwise increase it.
+            let slideFactor = 0.1 * slideMultiplier  // Increase for more of a slide
+            
+            // 3. calculate the final point is within the view's bounds.
+            var finalPoint = CGPoint(x: panGesture.view!.center.x + (velocity.x * slideFactor), y: panGesture.view!.center.y + (velocity.y * slideFactor))
+            
+            // 4. make sure the final point is within the view's bounds.
+            finalPoint.x = min(max(finalPoint.x, 0), self.view.bounds.size.width)
+            finalPoint.y = min(max(finalPoint.y, 0), self.view.bounds.size.height)
+            
+            // 5. animate the view to the final resting place.
+            UIView.animateWithDuration(Double(slideFactor * 2), delay: 0,
+                
+                // 6. use the "ease out" animation option to slow down the movement over time.
+                options: UIViewAnimationOptions.CurveEaseOut, animations: {
+                    panGesture.view!.center = finalPoint
+            }, completion: nil)
+            
+        }
+
+    }
+    
+    func handlePicPanGesture(panGesture: UIPanGestureRecognizer) {
+        
+        println("image")
+        
+        // get new translation value (the distance that finger have moved)
+        var translation = panGesture.translationInView(view)
+        panGesture.setTranslation(CGPointZero, inView: view)
+        println(translation)
+        
+        // add dx, dy to current image center position
+        var img = panGesture.view as! UIImageView
+        img.center = CGPoint(x: img.center.x + translation.x,
+            y: img.center.y + translation.y)
+        
+        // detect the touch velocity
+        if panGesture.state == UIGestureRecognizerState.Ended {
+            
+            // 1. figure out the length of the velocity vector (i.e. the magnitude)
+            let velocity = panGesture.velocityInView(view)
+            let magnitude = sqrt((velocity.x * velocity.x) + (velocity.y * velocity.y))
+            let slideMultiplier = magnitude / 200
+            println("magnitude: \(magnitude), slideMultiplier: \(slideMultiplier)")
+            
+            // 2. if the length is < 200, then decrease the base speed, otherwise increase it.
+            let slideFactor = 0.1 * slideMultiplier  // Increase for more of a slide
+            
+            // 3. calculate the final point is within the view's bounds.
+            var finalPoint = CGPoint(x: panGesture.view!.center.x + (velocity.x * slideFactor), y: panGesture.view!.center.y + (velocity.y * slideFactor))
+            
+            // 4. make sure the final point is within the view's bounds.
+            finalPoint.x = min(max(finalPoint.x, 0), self.view.bounds.size.width)
+            finalPoint.y = min(max(finalPoint.y, 0), self.view.bounds.size.height)
+            
+            // 5. animate the view to the final resting place.
+            UIView.animateWithDuration(Double(slideFactor * 2), delay: 0,
+                
+                // 6. use the "ease out" animation option to slow down the movement over time.
+                options: UIViewAnimationOptions.CurveEaseOut, animations: {
+                    panGesture.view!.center = finalPoint
+                }, completion: nil)
+            
+        }
+    }
+
+    // Pinch and Rotation Gestures
+    func handlePinch(reconizer: UIPinchGestureRecognizer) {
+        
+        if let view = reconizer.view {
+            view.transform = CGAffineTransformScale(view.transform, reconizer.scale, reconizer.scale)
+            
+            reconizer.scale = 1
+        }
+    }
+    
+    func handleRotation(reconizer: UIRotationGestureRecognizer) {
+        
+        if let view = reconizer.view {
+            view.transform = CGAffineTransformRotate(view.transform, reconizer.rotation)
+            
+            reconizer.rotation = 0
+        }
+    }
+    
+    // dismiss keyboard when touch outside
+    func dismissKeyboard() {
+        
+        self.addWordTextField.text = ""
+        self.addWordTextField.resignFirstResponder()
+    }
+    
+    // dismiss keyboard when press return key
+    func addNewWordLabel() {
+        
+        newText = self.addWordTextField.text
+        println("\(newText)")
+        
+        // add new word into wordArray
+        if (newText != nil) {
+            
+            wordArray.append(newText)
+        }
+        
+        refreshAllData()
+    }
+    
+    // edit last member in wordArray
+    func editLastWordLabel() {
+        
+        if editLastWord == false {
+            editLastWord = true
+        }
+        
+        newText = self.editTextField.text
+        println("\(newText)")
+        
+        // add new word into wordArray
+        if (editTextField.text != nil) {
+            
+            wordArray.removeLast()
+            println("\(wordArray.count)")
+            
+            wordArray.append(editTextField.text!)
+        }
+        
+//        var tapView = UITapGestureRecognizer(target: self, action: ("dismissKeyboard"))
+//        view.addGestureRecognizer(tapView)
+        
+        refreshAllData()
+    }
+    
+    func textFieldShouldReturn(textField: UITextField) -> Bool {
+        
+        if (textField.tag == 0) {
+            
+            addNewWordLabel()
+        }
+        else if (textField.tag == 1) {
+            
+            editLastWordLabel()
+            editLastWord = false
+        }
+        
+        // Pan Gesture
+        var panGesture = UIPanGestureRecognizer(target: self, action: Selector("handlePanGesture:"))
+        myLabel.addGestureRecognizer(panGesture)
+        myLabel.userInteractionEnabled = true
+        
+        textField.text = ""
+        self.addWordTextField.enabled = true
+        
+        println("\(wordArray.count)")
+        println("\(wordArray.last)")
+        
+        self.view.endEditing(true)
+        return false
+    }
+    
+    // create new textField for edit last added member in wordArray
+    @IBAction func editWordPressedButton(sender: UIButton) {
+        
+        self.addWordTextField.enabled = false
+
+        editTextField = UITextField()
+        editTextField.text = wordArray.last
+        editTextField.frame.size.width = view.frame.size.width - 10
+        editTextField.frame.size.height = 25
+        editTextField.center = CGPoint(x: (view.frame.width/2) , y: (view.frame.height/3))
+        editTextField.font = UIFont.systemFontOfSize(20)
+        editTextField.backgroundColor = UIColor.lightGrayColor()
+        editTextField.textAlignment = .Center
+        editTextField.tag = 1
+        editTextField.becomeFirstResponder()
+        
+        self.view.addSubview(editTextField)
+        
+        editTextField.delegate = self
+        
+    }
+    
+    // change label background colors by random
+    @IBAction func changeBGColorsPressed(sender: UIButton) {
+        
+        newColor = getRandomColor()
+
+        if (newColor == myLabel.textColor) {
+            newColor = getRandomColor()
+        }
+        
+        bgColorButton.backgroundColor = newColor
+        refreshAllData()
+    }
+    
+    func getRandomColor() -> UIColor{
+        
+        // use the drand48() method to generate a random number between 0 to 1.  These functions generate pseudo-random numbers using the linear congruential algorithm and 48-bit integer arithmetic.
+            
+        randomRed = CGFloat(drand48())
+        randomGreen = CGFloat(drand48())
+        randomBlue = CGFloat(drand48())
+        
+        return UIColor(red: randomRed, green: randomGreen, blue: randomBlue, alpha: 1.0)
+        
+    }
+
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+        // Dispose of any resources that can be recreated.
+    }
+
+    func gestureRecognizer(gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWithGestureRecognizer: UIGestureRecognizer) -> Bool {
+        
+        gestureRecognizer.delegate = self
+        return true
+    }
+}
+
