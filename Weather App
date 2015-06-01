@@ -1,0 +1,109 @@
+//
+//  ViewController.swift
+//  Weather App
+//
+//  Created by Nas@Mac on 26/5/58.
+//  Copyright (c) พ.ศ. 2558 Nas-Mac. All rights reserved.
+//
+
+import UIKit
+
+class ViewController: UIViewController {
+    
+    @IBOutlet weak var DateLabel: UILabel!
+    @IBOutlet weak var timeLabel: UILabel!
+    
+    @IBOutlet weak var townLabel: UILabel!
+    @IBOutlet weak var temperatureButton: UIButton!
+    
+    @IBOutlet weak var rainLabel: UILabel!
+    @IBOutlet weak var humidityLabel: UILabel!
+    
+    
+    var myTown: String!
+    var temperature: Int16!
+    var celsius: Float32!
+    var farenheit: Float32!
+    var humadity: Int8!
+    var rainProbability: Int8!
+    var selectCelsius: Bool!
+    //var currentDate:
+    //var currentTime:
+    
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        
+        // 1 degree Celsius = 33.8 degrees Farenhiet (rough calculate)
+        // 1 F = (1 C * 1.8) + 32
+        myTown = "Nonthaburi"
+        townLabel.text = myTown
+    
+        celsius = 33
+        selectCelsius = true
+        
+        humadity = 56
+        humidityLabel.text = String(humadity)+"%"
+        rainProbability = 0
+        rainLabel.text = String(rainProbability)+"%"
+        
+        currentTimeStamp()
+    }
+
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+        // Dispose of any resources that can be recreated.
+    }
+
+    @IBAction func changeTempButton(sender: UIButton) {
+        
+        if (selectCelsius == true) {
+            
+            selectCelsius = false
+            farenheit = (celsius * 1.8) + 32
+            sender.setTitle("\(farenheit)°f", forState: UIControlState.Normal)
+        }
+        
+        else if (selectCelsius != true) {
+            
+            selectCelsius = true
+            sender.setTitle("\(celsius)°c", forState: UIControlState.Normal)
+        }
+        
+        println("button")
+    }
+    
+    func currentTimeStamp() {
+        
+        // date & time formatter
+        var currentDate = NSDate()
+        var dateFormatter = NSDateFormatter()
+        var timeFormatter = NSDateFormatter()
+        dateFormatter.dateFormat = "MMM dd, yyyy"
+        timeFormatter.dateFormat = "h:mm a"
+        
+        // or select each date & time components from NSCalendar class
+        var calendar = NSCalendar.currentCalendar()
+        var unitDay = calendar.component(NSCalendarUnit.CalendarUnitDay, fromDate: currentDate)
+        var month = calendar.component(NSCalendarUnit.MonthCalendarUnit, fromDate: currentDate)
+        var time = calendar.component(NSCalendarUnit.CalendarUnitHour, fromDate: currentDate)
+        var hour = calendar.component(.CalendarUnitMinute, fromDate: currentDate)
+        var dayInweek = calendar.component(NSCalendarUnit.CalendarUnitWeekday, fromDate: currentDate)
+        var a = calendar.component(NSCalendarUnit.CalendarUnitWeekdayOrdinal, fromDate: currentDate)
+        
+        var monthName = (calendar.weekdaySymbols[dayInweek]) as! String
+        
+        // or set localized date with NSDateFormatterStyle
+        var localDate = NSDateFormatter.localizedStringFromDate(NSDate(), dateStyle:  NSDateFormatterStyle.FullStyle, timeStyle: NSDateFormatterStyle.ShortStyle)
+        
+        DateLabel.text = "\(monthName), \(dateFormatter.stringFromDate(currentDate))"
+        timeLabel.text = "\(timeFormatter.stringFromDate(currentDate))"
+        
+        println("\(monthName), \(dateFormatter.stringFromDate(currentDate))")
+        println("\(timeFormatter.stringFromDate(currentDate))")
+        println("\(currentDate)")
+
+    }
+
+}
+
