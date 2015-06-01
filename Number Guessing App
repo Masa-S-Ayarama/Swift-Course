@@ -1,0 +1,174 @@
+//
+//  ViewController.swift
+//  Number Guessing
+//
+//  Created by Nas@Mac on 30/5/58.
+//  Copyright (c) พ.ศ. 2558 Nas-Mac. All rights reserved.
+//
+ 
+import UIKit
+ 
+class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizerDelegate {
+    // MARK: Declaration
+    // UI Objects
+    @IBOutlet weak var inputNumTxtField: UITextField!
+    @IBOutlet weak var guessButton: UIButton!
+    @IBOutlet weak var resetButton: UIButton!
+    @IBOutlet weak var resultNumLabel: UILabel!
+    @IBOutlet weak var hiLowLabel: UILabel!
+    @IBOutlet weak var wordLabel1: UILabel!
+    @IBOutlet weak var wordLabel2: UILabel!
+    @IBOutlet weak var resultsImgView: UIImageView!
+    
+    
+    // ivars
+    var num: Int!
+    var guessNumber: Int!
+    var matchNum: Bool!
+    var wordsString1: String!
+    var wordsString2: String!
+    
+    
+    // MARK: - View's life cycle
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        
+        guessButton.addTarget(self, action: ("guessNumButtonPressed"), forControlEvents: UIControlEvents.TouchUpInside)
+        resetButton.addTarget(self, action: ("resetGuessNumber"), forControlEvents: UIControlEvents.TouchUpInside)
+        
+        inputNumTxtField.delegate = self
+                
+        var tapView = UITapGestureRecognizer(target: self, action: ("handleTap:"))
+        view.addGestureRecognizer(tapView)
+        
+        // Set notificatio
+//        var notif = NSNotificationCenter()
+//        notif.
+        
+        resetGuessNumber()
+        
+    }
+ 
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+        // Dispose of any resources that can be recreated.
+    }
+    
+    //MARK: - Reset
+    func resetGuessNumber() {
+        
+        //if resetButton = sender as UIButton  {
+            
+        // Random Number between 0 - 100
+        num = Int(arc4random_uniform(100) + 1)  // [0 - 99], [0 - 99] + 1 = [1 - 100]
+        println("Number to guess: \(num)")
+        
+        inputNumTxtField.text = ""
+        wordLabel1.text = "What's your lucky number today."
+        wordLabel2.text = ""
+        resultsImgView.image = UIImage(named: "")
+        resultNumLabel.text = "..."
+        hiLowLabel.text = "Number"
+        hiLowLabel.sizeToFit()
+        //}
+    }
+    
+    //MARK: - Method compare the number
+    func guessNumButtonPressed() {
+        // Optional Binding
+        if let userInput = inputNumTxtField.text.toInt() {
+           println("\(userInput) is valid number")
+            
+            guessNumber = userInput
+            
+            showHiOrLow()
+            compareNumber(guessNumber)
+        }else {
+            var alertView = UIAlertView()
+            alertView.addButtonWithTitle("OK")
+            alertView.title = "Invalid input"
+            alertView.message = "Please input only number."
+            alertView.show()
+        }
+        inputNumTxtField.resignFirstResponder()
+    }
+    
+    func compareNumber(myNum: Int) {
+        
+        // higher or lower number comparation
+        if myNum == num {
+            println("You won.")
+            wordLabel1.text = "You won."
+        }
+        else if (myNum >= (num - 3) && myNum < num) || (myNum <= (num + 3) && myNum > num) {
+            println("Not over 3, your lucky number come soon")
+            wordLabel1.text = "Not over 3, your lucky number come soon."
+        }
+        else if (myNum >= (num - 5) && myNum < num) || (myNum <= (num + 5) && myNum > num) {
+            println("Not over 5, guess again.")
+            wordLabel1.text = "Not over 5, guess again."
+        }
+        else if (myNum >= (num - 10) && myNum < num) || (myNum <= (num + 10) && myNum > num) {
+            println("Not over 10, almost done, sheer you up.")
+            wordLabel1.text = "Not over 10, almost done, sheer you up."
+        }
+        else if (myNum >= (num - 20) && myNum < num) || (myNum <= (num + 20) && myNum > num) {
+            println("Not over 20, not too far.")
+            wordLabel1.text = "Not over 20, not too far."
+        }
+        else if (myNum >= (num - 30) && myNum < num) || (myNum <= (num + 30) && myNum > num) {
+            println("Not over 30, don't give up.")
+            wordLabel1.text = "Not over 30, don't give up."
+        }
+        else if (myNum >= (num - 40) && myNum < num) || (myNum <= (num + 40) && myNum > num) {
+            println("Not over 40, try it once more.")
+            wordLabel1.text = "Not over 40, try it once more."
+        }
+        else if (myNum >= (num - 50) && myNum < num) || (myNum <= (num + 50) && myNum > num) {
+            println("Over 50, very very far try again.")
+            wordLabel1.text = "Over 50, very very far try again."
+        }
+        else {
+            println("It's too far.")
+            wordLabel1.text = "It's too far."
+        }
+        
+    }
+    
+    func showHiOrLow() {
+        
+        resultNumLabel.text = String(guessNumber)
+        resultNumLabel.sizeToFit()
+ 
+        if guessNumber > num {
+            hiLowLabel.text = "Too Hi"
+            resultsImgView.image = UIImage(named: "")
+            resultsImgView.sizeToFit()
+        }
+        else if guessNumber < num {
+            hiLowLabel.text = "Too Low"
+            resultsImgView.image = UIImage(named: "")
+            resultsImgView.sizeToFit()
+        }
+        else if guessNumber == num {
+            hiLowLabel.text = "Lucky!"
+            hiLowLabel.sizeToFit()
+            resultsImgView.image = UIImage(named: "win-1024x1024.jpg")
+            resultsImgView.sizeToFit()
+            // add sound
+        }
+    }
+    
+    //MARK: - Delegate
+    func textFieldShouldReturn(textField: UITextField) -> Bool {
+        
+        guessNumButtonPressed()
+        textField.resignFirstResponder()
+        return true
+    }
+    
+    func handleTap(recognizer: UITapGestureRecognizer) {
+        
+        inputNumTxtField.resignFirstResponder()
+    }
+}
