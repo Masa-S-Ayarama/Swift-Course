@@ -1,0 +1,303 @@
+//
+//  ViewController.swift
+//  Word Magnets
+//
+//  Created by Nas@Mac on 25/5/58.
+//  Copyright (c) พ.ศ. 2558 Nas-Mac. All rights reserved.
+//
+ 
+import UIKit
+ 
+class ViewController: UIViewController, UITextFieldDelegate {
+    
+    @IBOutlet weak var addWordTextField: UITextField!
+    @IBOutlet weak var editWordButton: UIButton!
+    @IBOutlet weak var bgColorButton: UIButton!
+    
+    var wordArray: [String]!
+    var imgArray: [String]!
+    
+    var x: CGFloat!
+    var y: CGFloat!
+    
+    var idx: Int8!
+    
+    var newText: String!
+    var newLabel: UILabel!
+    var myLabel: UILabel!
+    
+    var editLastWord: Bool!
+    var editTextField: UITextField!
+    
+    var newColor: UIColor!
+    
+    var randomRed: CGFloat!
+    var randomGreen: CGFloat!
+    var randomBlue:CGFloat!
+ 
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        
+        // view device screen size
+        println("\(view.bounds.size)")
+        
+        // add data to word array
+        wordArray = ["play", "ping-pong", "with", "Michael", "while", "enjoy", "dancing", "with", "Taylor Swift's", "songs"]
+        imgArray = ["friend1.png", "friend2.png"]
+ 
+        
+        editLastWord = false
+        
+        bgColorButton.backgroundColor = UIColor.blackColor()
+        newColor = UIColor.blackColor()
+        view.backgroundColor = UIColor.lightGrayColor()
+        
+        addWordTextField.delegate = self
+        addWordTextField.tag = 0
+        
+        var tapView = UITapGestureRecognizer(target: self, action: Selector("dismissKeyboard"))
+        view.addGestureRecognizer(tapView)
+        
+        refreshAllData()
+        
+    }
+    
+    func refreshAllData() {
+        
+        for view in self.view.subviews {
+            
+            if  view.isKindOfClass(UILabel) {
+                view.removeFromSuperview()
+            }
+            if (view.tag == 1) {
+                view.removeFromSuperview()
+            }
+            if (view.tag == 2) {
+                view.removeFromSuperview()
+            }
+        }
+        
+        refreshWordLabel()
+        refreshImage()
+    }
+    
+    func refreshWordLabel() {
+        
+        // loop for random value x, y
+        for word in wordArray {
+            
+            myLabel = UILabel()
+            myLabel.text = word
+            myLabel.font = UIFont.systemFontOfSize(20)
+            myLabel.textColor = UIColor.whiteColor()
+            myLabel.sizeToFit()
+            myLabel.backgroundColor = newColor
+            
+            // Define value of x and y for label not appear over screen.
+            x = CGFloat(arc4random_uniform(300))
+            y = CGFloat(arc4random_uniform(600))
+            
+            myLabel.center = CGPoint(x: x, y: y)
+            
+            view.addSubview(myLabel)
+            
+            // Pan Gesture
+            var panGesture = UIPanGestureRecognizer(target: self, action: Selector("handlePanGesture:"))
+            myLabel.addGestureRecognizer(panGesture)
+            myLabel.userInteractionEnabled = true
+            
+            UIView.animateWithDuration(10.0, delay: 2.5, usingSpringWithDamping: 1.0, initialSpringVelocity: 0.0, options: nil, animations: {
+                
+                self.myLabel.center = CGPoint(x: self.x, y: self.y)
+                }, completion: nil)
+        }
+    }
+    
+    func refreshImage() {
+        
+        var imgView = UIImageView()
+        //imgArray = ["friend1.png", "friend2.png"]
+        
+        for img in imgArray {
+            
+            imgView = UIImageView()
+            imgView.image = UIImage(named: img)
+            imgView.sizeToFit()
+            imgView.tag = 2
+            
+            x = CGFloat(arc4random_uniform(360))
+            y = CGFloat(arc4random_uniform(600))
+            
+            imgView.center = CGPoint(x: x, y: y)
+            
+            view.addSubview(imgView)
+            
+            // Pan Gesture
+            var panGesture = UIPanGestureRecognizer(target: self, action: Selector("handlePicPanGesture:"))
+            imgView.addGestureRecognizer(panGesture)
+            imgView.userInteractionEnabled = true
+        }
+        
+    }
+    
+    func handlePanGesture(panGesture: UIPanGestureRecognizer) {
+        
+        println("pan")
+        
+        // get new translation value (the distance that finger have moved)
+        var translation = panGesture.translationInView(view)
+        panGesture.setTranslation(CGPointZero, inView: view)
+        println(translation)
+        
+        // add dx, dy to current label center position
+        var label = panGesture.view as! UILabel
+        label.center = CGPoint(x: label.center.x + translation.x,
+            y: label.center.y + translation.y)
+ 
+    }
+    
+    func handlePicPanGesture(panGesture: UIPanGestureRecognizer) {
+        
+        println("image")
+        
+        // get new translation value (the distance that finger have moved)
+        var translation = panGesture.translationInView(view)
+        panGesture.setTranslation(CGPointZero, inView: view)
+        println(translation)
+        
+        // add dx, dy to current image center position
+        var img = panGesture.view as! UIImageView
+        img.center = CGPoint(x: img.center.x + translation.x,
+            y: img.center.y + translation.y)
+        
+    }
+ 
+    
+    // dismiss keyboard when touch outside
+    func dismissKeyboard() {
+        
+        self.addWordTextField.text = ""
+        self.addWordTextField.resignFirstResponder()
+    }
+    
+    // dismiss keyboard when press return key
+    func addNewWordLabel() {
+        
+        newText = self.addWordTextField.text
+        println("\(newText)")
+        
+        // add new word into wordArray
+        if (newText != nil) {
+            
+            wordArray.append(newText)
+        }
+        
+        refreshAllData()
+    }
+    
+    // edit last member in wordArray
+    func editLastWordLabel() {
+        
+        if editLastWord == false {
+            editLastWord = true
+        }
+        
+        newText = self.editTextField.text
+        println("\(newText)")
+        
+        // add new word into wordArray
+        if (editTextField.text != nil) {
+            
+            wordArray.removeLast()
+            println("\(wordArray.count)")
+            
+            wordArray.append(editTextField.text!)
+        }
+        
+        var tapView = UITapGestureRecognizer(target: self, action: Selector("dismissKeyboard"))
+        view.addGestureRecognizer(tapView)
+        
+        refreshAllData()
+    }
+    
+    func textFieldShouldReturn(textField: UITextField) -> Bool {
+        
+        if (textField.tag == 0) {
+            
+            addNewWordLabel()
+        }
+        else if (textField.tag == 1) {
+            
+            editLastWordLabel()
+            editLastWord = false
+        }
+        
+        // Pan Gesture
+        var panGesture = UIPanGestureRecognizer(target: self, action: Selector("handlePanGesture:"))
+        myLabel.addGestureRecognizer(panGesture)
+        myLabel.userInteractionEnabled = true
+        
+        textField.text = ""
+        self.addWordTextField.enabled = true
+        
+        println("\(wordArray.count)")
+        println("\(wordArray.last)")
+        
+        self.view.endEditing(true)
+        return false
+    }
+    
+    // create new textField for edit last added member in wordArray
+    @IBAction func editWordPressedButton(sender: UIButton) {
+        
+        self.addWordTextField.enabled = false
+ 
+        editTextField = UITextField()
+        editTextField.text = wordArray.last
+        editTextField.frame.size.width = view.frame.size.width - 10
+        editTextField.frame.size.height = 25
+        editTextField.center = CGPoint(x: (view.frame.width/2) , y: (view.frame.height/3))
+        editTextField.font = UIFont.systemFontOfSize(20)
+        editTextField.backgroundColor = UIColor.lightGrayColor()
+        editTextField.textAlignment = .Center
+        editTextField.tag = 1
+        editTextField.becomeFirstResponder()
+        
+        self.view.addSubview(editTextField)
+        
+        editTextField.delegate = self
+        
+    }
+    
+    // change label background colors by random
+    @IBAction func changeBGColorsPressed(sender: UIButton) {
+        
+        newColor = getRandomColor()
+ 
+        if (newColor == myLabel.textColor) {
+            newColor = getRandomColor()
+        }
+        
+        bgColorButton.backgroundColor = newColor
+        refreshAllData()
+    }
+    
+    func getRandomColor() -> UIColor{
+        
+        // use the drand48() method to generate a random number between 0 to 1.  These functions generate pseudo-random numbers using the linear congruential algorithm and 48-bit integer arithmetic.
+            
+        randomRed = CGFloat(drand48())
+        randomGreen = CGFloat(drand48())
+        randomBlue = CGFloat(drand48())
+        
+        return UIColor(red: randomRed, green: randomGreen, blue: randomBlue, alpha: 1.0)
+        
+    }
+ 
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+        // Dispose of any resources that can be recreated.
+    }
+ 
+ 
+}

@@ -1,0 +1,97 @@
+//
+//  ViewController.swift
+//  Area Calculation
+//
+//  Created by Nas@Mac on 22/5/58.
+//  Copyright (c) พ.ศ. 2558 Nas-Mac. All rights reserved.
+//
+
+import UIKit
+
+// Adds new functionality to Swift's String object
+extension String {
+    func toDouble() -> Double? {
+        return NSNumberFormatter().numberFromString(self)?.doubleValue
+    }
+}
+extension String {
+    func toFloat() -> Float? {
+        return NSNumberFormatter().numberFromString(self)?.floatValue
+    }
+}
+extension Float {
+    var floatToCGFloat: CGFloat { return CGFloat(self) }
+}
+
+extension Double {
+    var doubleToCGFloat: CGFloat { return CGFloat(self) }
+}
+
+class ViewController: UIViewController {
+
+    @IBOutlet weak var widthTextField: UITextField!
+    @IBOutlet weak var heightTextField: UITextField!
+    
+    @IBOutlet weak var areaOutput: UILabel!
+    @IBOutlet weak var perimeterOutput: UILabel!
+    
+    var sizeRectangle: UIImageView!
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        // Do any additional setup after loading the view, typically from a nib.
+    }
+
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+        // Dispose of any resources that can be recreated.
+    }
+
+    @IBAction func buttonPressed(sender: AnyObject) {
+        
+        println("button pressed")
+        
+        if let width = widthTextField.text.toDouble() {
+            if let height = heightTextField.text.toDouble() {
+                
+                println("Valid input! \(width) x \(height)")
+                
+                var area = width * height
+                var perimeter = 2 * (width + height)
+                
+                sizeRectangle = UIImageView()
+                var overSize = UILabel()
+
+                
+                if (width <= 350.0 && height <= 350.0) {
+                    
+                    overSize.text = ""
+                    overSize.backgroundColor = UIColor.whiteColor()
+                    sizeRectangle.backgroundColor = UIColor.redColor()
+                    sizeRectangle.frame.size.width = width.doubleToCGFloat
+                    sizeRectangle.frame.size.height = height.doubleToCGFloat
+                    sizeRectangle.center = CGPoint(x: view.frame.width/2, y: view.frame.height - (perimeterOutput.frame.origin.y - 10))
+                    view.addSubview(sizeRectangle)
+                    
+                    
+                    areaOutput.text = "Area = " + String(stringInterpolationSegment: area)
+                    perimeterOutput.text = "Perimeter = " + String(stringInterpolationSegment: perimeter)
+                }
+                else if (width > 350.0 || height > 350.0){
+                
+                    sizeRectangle.backgroundColor = UIColor.whiteColor()
+                    overSize.text = "Over 350 Points, is not a valid number!"
+                    overSize.font = UIFont.systemFontOfSize(18)
+                    overSize.backgroundColor = UIColor.yellowColor()
+                    overSize.sizeToFit()
+                    overSize.center = CGPoint(x: view.frame.width/2, y: view.frame.height/2)
+                    view.addSubview(overSize)
+                    
+                }
+            
+            }
+        }
+    }
+
+}
+

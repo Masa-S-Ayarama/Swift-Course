@@ -1,0 +1,108 @@
+//
+//  ViewController.swift
+//  Turkey Cooking Calculator
+//
+//  Created by Nas@Mac on 31/5/58.
+//  Copyright (c) พ.ศ. 2558 Nas-Mac. All rights reserved.
+//
+
+import UIKit
+
+class ViewController: UIViewController {
+
+// MARK: Declaration
+    
+    // IBOutlet:
+    @IBOutlet weak var peopleNumSlider: UISlider!
+    @IBOutlet weak var turkeyPicIMV: UIImageView!
+    @IBOutlet weak var quantityLabel: UILabel!
+    @IBOutlet weak var thawTimeLabel: UILabel!
+    @IBOutlet weak var cookTimeLabel: UILabel!
+    @IBOutlet weak var timePrepCookLabel: UILabel!
+    @IBOutlet weak var numberGuestsLabel: UILabel!
+    
+    
+    // ivars: 
+    var numOfGuests: Float!
+    var turkeySize: Float!
+    var thawTime: Float!
+    var cookTime: Float!
+    var thawTimeHour: Int!
+    var thawTimeMinute: Int!
+    var cookTimeHour: Int!
+    var cookTimeMinute: Int!
+    var timePrepCook: Int!
+
+//    MARK: Instance Method
+    func refreshCalculation() {
+        
+        timePrepCook = Int(calculate_Prep_Cooking_Time(numOfGuests))
+        
+        quantityLabel.text = String(stringInterpolationSegment: turkeySize) + " kg"
+        thawTimeLabel.text = String(thawTimeHour) + " hrs. " + String(thawTimeMinute) + " min"
+        cookTimeLabel.text = String(cookTimeHour) + " hrs. " + String(cookTimeMinute) + " min"
+        timePrepCookLabel.text = String(timePrepCook / 60) + " hr. " + String(timePrepCook % 60) + " min"
+    }
+    
+    func calculate_Prep_Cooking_Time(guest: Float) -> Float {
+        
+        // size: 700g per person
+        // thaw: 24hr per 1800g of turkey  = ((size / 1800g) * 1_440 min) / 60
+        // cook: 15min per 450g of turkey = ((size / 450g) * 15 min) / 60
+        
+        let sizeVar = 700 * guest
+        let thawVar = (sizeVar / 1800) * 1440
+        let cookVar = (sizeVar / 450) * 15
+        let totalPrepCook = thawVar + cookVar
+        
+        thawTime = thawVar
+        cookTime = cookVar
+        turkeySize = sizeVar / 1000
+        
+        thawTimeHour = Int(thawVar) / 60
+        thawTimeMinute = Int(thawVar % 60)
+        cookTimeHour = Int(cookVar) / 60
+        cookTimeMinute = Int(cookVar % 60)
+        
+        println("Absolute thaw time = \(thawVar)")
+        println("Absolute cook time = \(cookVar)")
+        println("Prep and Cook time = \(totalPrepCook)")
+        
+        return totalPrepCook
+        
+    }
+//   MARK: IBAction Methods
+    @IBAction func slideToChangeValue(sender: UISlider) {
+        
+        if sender == peopleNumSlider! as UISlider {
+            peopleNumSlider.value = roundf(sender.value)    // "roundf(Float) to implementing steps with the UISlider
+        }
+        numOfGuests = (peopleNumSlider.value)
+        numberGuestsLabel.text = "Cook for \(Int(numOfGuests)) dishes"
+        
+        refreshCalculation()
+    }
+    
+//    MARK: View's Life Cycle
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        view.backgroundColor = UIColor.greenColor()
+        peopleNumSlider.minimumValue = 1
+        peopleNumSlider.maximumValue = 50
+        peopleNumSlider.value = 1
+        
+        numOfGuests = peopleNumSlider.value
+        numberGuestsLabel.text = "Cook for \(Int(numOfGuests)) dishes"
+        
+        refreshCalculation()
+   
+    }
+    
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+        // Dispose of any resources that can be recreated.
+    }
+    
+}
+
+
